@@ -55,14 +55,19 @@ def postbook(request):
                   })
 
 def displaybooks(request):
-    books = Book.objects.all()
+    query = request.GET.get('q', '')
+    if query:
+        books = Book.objects.filter(name__icontains=query)
+    else:
+        books = Book.objects.all()
     for b in books:
         b.pic_path = b.picture.url[14:]
     return render(request,
                   'bookMng/displaybooks.html',
                   {
                       'item_list': MainMenu.objects.all(),
-                      'books': books
+                      'books': books,
+                      'query': query
                   })
 
 
