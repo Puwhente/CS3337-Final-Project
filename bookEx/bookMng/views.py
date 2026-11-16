@@ -1,12 +1,7 @@
-from django.views.generic.edit import CreateView
-from django.contrib.auth.forms import UserCreationForm
-from django.urls import reverse_lazy
-from django.http import HttpResponse
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
 from .models import MainMenu
-from .forms import BookForm
 from .models import Book
+from .forms import BookForm
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
@@ -17,6 +12,9 @@ from django.views.decorators.http import require_GET, require_http_methods, requ
 
 from .models import MessageThread, PrivateMessage
 
+from django.views.generic.edit import CreateView
+from django.contrib.auth.forms import UserCreationForm
+from django.urls import reverse_lazy
 
 
 # Create your views here.
@@ -29,12 +27,21 @@ def index(request):
                       'item_list': MainMenu.objects.all()
                   })
 
+
+def aboutus(request):
+    return render(request,
+                  'bookMng/aboutus.html',
+                  {
+                      'item_list': MainMenu.objects.all()
+                  })
+
+
 def postbook(request):
     submitted = False
     if request.method == 'POST':
         form = BookForm(request.POST, request.FILES)
         if form.is_valid():
-            #form.save()
+            # form.save()
             book = form.save(commit=False)
             try:
                 book.username = request.user
@@ -53,6 +60,7 @@ def postbook(request):
                       'item_list': MainMenu.objects.all(),
                       'submitted': submitted
                   })
+
 
 def displaybooks(request):
     query = request.GET.get('q', '')
@@ -80,6 +88,7 @@ class Register(CreateView):
         form.save()
         return HttpResponseRedirect(self.success_url)
 
+
 def book_detail(request, book_id):
     book = Book.objects.get(id=book_id)
 
@@ -90,6 +99,7 @@ def book_detail(request, book_id):
                       'item_list': MainMenu.objects.all(),
                       'book': book
                   })
+
 
 def mybooks(request):
     books = Book.objects.filter(username=request.user)
@@ -102,6 +112,7 @@ def mybooks(request):
                       'books': books
                   })
 
+
 def book_delete(request, book_id):
     book = Book.objects.get(id=book_id)
     book.delete()
@@ -111,6 +122,7 @@ def book_delete(request, book_id):
                   {
                       'item_list': MainMenu.objects.all(),
                   })
+
 
 User = get_user_model()
 
