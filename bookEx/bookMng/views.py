@@ -1,12 +1,12 @@
+from django.http import HttpResponse
+from django.shortcuts import render
+from .models import MainMenu
+from .forms import BookForm, BookCommentForm
+from django.http import HttpResponseRedirect
+from .models import Book, BookComment
 from django.views.generic.edit import CreateView
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
-from django.http import HttpResponse
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
-from .models import MainMenu
-from .forms import BookForm
-from .models import Book
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
@@ -17,10 +17,7 @@ from django.views.decorators.http import require_GET, require_http_methods, requ
 
 from .models import MessageThread, PrivateMessage
 
-
-
 # Create your views here.
-
 
 def index(request):
     return render(request,
@@ -55,19 +52,14 @@ def postbook(request):
                   })
 
 def displaybooks(request):
-    query = request.GET.get('q', '')
-    if query:
-        books = Book.objects.filter(name__icontains=query)
-    else:
-        books = Book.objects.all()
+    books = Book.objects.prefetch_related("comments__author").all()
     for b in books:
         b.pic_path = b.picture.url[14:]
     return render(request,
                   'bookMng/displaybooks.html',
                   {
                       'item_list': MainMenu.objects.all(),
-                      'books': books,
-                      'query': query
+                      'books': books
                   })
 
 
@@ -266,3 +258,24 @@ def mark_thread_read(request: HttpRequest, thread_id: int) -> HttpResponse:
 
     messages.success(request, "Thread marked as read.")
     return redirect("thread_detail", thread_id=thread.id)
+
+@login_required
+@require_POST
+def add_book_comment(request, book_id):
+    book = get_object_or_404(Book, pk=book_id)
+    form = BookCommentForm(request.POST)
+    if form.is_valid():
+        BookComment.objects.create(
+            book=book, author=request.user, body=form.cleaned_data["body"]
+        )
+        messages.success(request, "Your comment was posted.")
+        return redirect(reverse_lazy("displaybooks") + f"#comments-{book.pk}")
+
+    # Keep invalid input so the user can correct it without retyping.
+    books = Book.objects.prefetch_related("comments__author").all()
+    return render(request, "bookMng/displaybooks.html", {
+        "item_list": MainMenu.objects.all(),
+        "books": books,
+        "comment_form": form,
+        "comment_book_id": book.pk,
+    }, status=400)

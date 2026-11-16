@@ -10,7 +10,7 @@
 {% endblock sidenav %}
 
 {% block content %}
-   <h1>My Books</h1>
+   <h1>Display Books</h1>
    <table border="2" >
       <tr>
           <th>
@@ -23,9 +23,8 @@
               User Name
           </th>
           <th>
-              Delete
+              DELETE
           </th>
-
       </tr>
    {% for book in books %}
        <tr>
@@ -38,7 +37,7 @@
           <td>
             {{ book.username }}
          </td>
-            <td>
+       <td>
         <a href="book_delete/{{ book.id }}">  <img src="{% static 'delete_button.jpg' %}" width="100" />
          </a>
        </td>

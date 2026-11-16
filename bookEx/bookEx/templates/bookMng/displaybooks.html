@@ -10,12 +10,7 @@
 {% endblock sidenav %}
 
 {% block content %}
-    <form method="get">
-        <input type="text" name="q" value="{{ query }}" placeholder="Search by book title">
-        <button type="submit">Search</button>
-    </form>
-
- <div class="table-container">
+  <div class="table-container">
     <table class="professional-table">
       <thead>
         <tr class="table-title-row">
@@ -28,22 +23,50 @@
           <th>Post Date</th>
         </tr>
       </thead>
-         <tbody>
-         {%  if not books %}
-         <tr>
-             <td colspan="4">No books found.</td>
-         </tr>
-         {% endif %}
-
-         {% for book in books %}
+      <tbody>
+        {% for book in books %}
         <tr>
-          <td><a href="book_detail/{{ book.id }}">  {{ book.name }} </a></td>
+          <td><a href="{% url 'book_detail' book.id %}">  {{ book.name }} </a></td>
           <td>{{ book.price }}</td>
           <td>{{ book.username }}</td>
           <td>{{ book.publishdate }}</td>
         </tr>
-      </tbody>
+        <tr class="book-comments-row" id="comments-{{ book.id }}">
+          <td colspan="4">
+            <details class="book-comments">
+              <summary style="cursor: pointer; font-weight: bold;">
+                Comments ({{ book.comments.count }}) — click to expand
+              </summary>
+              {% for comment in book.comments.all %}
+                <article class="book-comment">
+                  <p><strong>{{ comment.author.username }}</strong>
+                    <time datetime="{{ comment.created_at|date:'c' }}">{{ comment.created_at|date:"M j, Y, g:i a" }}</time>
+                  </p>
+                  <div class="comment-body">{{ comment.body|linebreaksbr }}</div>
+                </article>
+              {% empty %}
+                <p class="no-comments">No comments yet. Be the first to comment!</p>
+              {% endfor %}
+              {% if user.is_authenticated %}
+                <form method="post" action="{% url 'add_book_comment' book.id %}" class="comment-form">
+                  {% csrf_token %}
+                  <label for="comment-{{ book.id }}">Add a comment</label>
+                  {% if comment_book_id == book.id %}
+                    <div class="comment-errors" role="alert">{{ comment_form.body.errors }}</div>
+                  {% endif %}
+                  <textarea id="comment-{{ book.id }}" name="body" rows="3" maxlength="1000" required placeholder="Write a comment (up to 1,000 characters)">{% if comment_book_id == book.id %}{{ comment_form.body.value|default_if_none:"" }}{% endif %}</textarea>
+                  <button type="submit">Post Comment</button>
+                </form>
+              {% else %}
+                <p><a href="{% url 'login' %}?next={% url 'displaybooks' %}">Log in to comment</a></p>
+              {% endif %}
+            </details>
+          </td>
+        </tr>
+         {% empty %}
+           <tr><td colspan="4">No books have been posted yet.</td></tr>
          {% endfor %}
+      </tbody>
     </table>
   </div>
 {% endblock content %}
