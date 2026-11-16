@@ -5,67 +5,6 @@
     <meta charset="UTF-8">
     <title>Simple Layout</title>
     <link href="{% static 'main.css' %}" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="{% static 'table_format.css' %}" type="text/css">
-    <link rel="stylesheet" href="{% static 'message_box.css' %}">
-</head>
-<body>
-
-    <!-- Top Banner -->
-    <header class="banner">
-        <span style="float: right;">
-            {% if user.is_authenticated %}
-               {{ user.username}}
-               <form action="{% url 'logout' %}?next=/" method="post">
-                   <button type="submit">logout</button>
-                   {% csrf_token %}
-               </form>
-            {% else %}
-               Not Logged in
-               <a href="{% url 'login' %}?next=/">login</a>
-            {% endif %}
-        </span>
-        <h1>Website Banner</h1>
-    </header>
-
-    <!-- Main Layout -->
-    <div class="container">
-
-        <!-- Left Menu -->
-        <nav class="sidebar">
-            <ul>
-                {% block sidenav %}
-                    <li><a href="{% url 'index' %}">Home</a></li>
-                    <li><a href="{% url 'displaybooks' %}">Display Books</a></li>
-                    <li><a href="{% url 'compose_message' %}">Compose</a></li>
-                    <li><a href="{% url 'inbox' %}">Inbox</a></li>
-                {% endblock sidenav %}
-            </ul>
-        </nav>
-{% for message in messages %}
-    <p class="{{ message.tags }}">{{ message }}</p>
-{% endfor %}
-        <!-- Right Main Content -->
-        <main class="content">
-            {% block content %}
-               <h1>Main Content</h1>
-            {% endblock content %}
-        </main>
-
-    </div>
-
-    <!-- Bottom Footer -->
-    <footer class="footer">
-        <p>&copy; 2026 Your Company Name. All rights reserved.</p>
-    </footer>
-
-</body>
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Simple Layout</title>
-    <link href="{% static 'main.css' %}" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="{% static 'table_format.css' %}" type="text/css" />
     <link rel="stylesheet" href="{% static 'message_box.css' %}">
 </head>
