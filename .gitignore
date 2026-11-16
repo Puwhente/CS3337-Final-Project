@@ -1,0 +1,39 @@
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# PyCharm / IntelliJ
+.idea/
+*.iml
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python environments
+venv/
+.venv/
+env/
+ENV/
+
+# Django local database
+db.sqlite3
+db.sqlite3-journal
+
+# Django generated files
+*.log
+media/
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# Testing / tooling
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
