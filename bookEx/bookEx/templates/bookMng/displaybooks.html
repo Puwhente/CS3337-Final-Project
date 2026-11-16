@@ -2,48 +2,169 @@
 {% load static %}
 
 {% block sidenav %}
-   {% for item in item_list %}
-      <li>
-        <a href="{{ item.link }}">  {{ item.item }} </a>
-      </li>
-   {% endfor %}
+    {% for item in item_list %}
+        <li>
+            <a href="{{ item.link }}">{{ item.item }}</a>
+        </li>
+    {% endfor %}
 {% endblock sidenav %}
 
 {% block content %}
-    <form method="get">
-        <input type="text" name="q" value="{{ query }}" placeholder="Search by book title">
-        <button type="submit">Search</button>
+<style>
+    .book-controls {
+        margin-bottom: 16px;
+    }
+
+    #book-filter {
+        margin: 0 8px;
+        padding: 8px 12px;
+        border: 1px solid #aaa;
+        border-radius: 5px;
+        background: white;
+        color: #222;
+    }
+
+    .professional-table .favorite-form {
+        margin: 0;
+        padding: 0;
+    }
+
+    .professional-table .favorite-button {
+        background: transparent;
+        border: 0;
+        color: #666;
+        cursor: pointer;
+        font-size: 28px;
+        line-height: 1;
+        padding: 8px;
+    }
+
+    .professional-table .favorite-button[aria-pressed="true"] {
+        color: #d6284b;
+    }
+
+    .favorite-button:focus-visible {
+        outline: 2px solid #2457a7;
+        outline-offset: 2px;
+    }
+</style>
+
+<div class="table-container">
+    <form method="get"
+          action="{% url 'displaybooks' %}"
+          class="book-controls">
+
+        <label for="book-filter">Show:</label>
+
+        <select name="filter"
+                id="book-filter"
+                onchange="this.form.submit()">
+
+            <option value="all"
+                    {% if selected_filter == 'all' %}selected{% endif %}>
+                All Books
+            </option>
+
+            <option value="favorites"
+                    {% if selected_filter == 'favorites' %}selected{% endif %}>
+                Favorite Books
+            </option>
+        </select>
+
+        <noscript>
+            <button type="submit">Show Books</button>
+        </noscript>
     </form>
 
- <div class="table-container">
-    <table class="professional-table">
-      <thead>
-        <tr class="table-title-row">
-          <th colspan="4">Display Books</th>
-        </tr>
-        <tr>
-          <th>Book Name</th>
-          <th>Book Price</th>
-          <th>User Name</th>
-          <th>Post Date</th>
-        </tr>
-      </thead>
-         <tbody>
-         {%  if not books %}
-         <tr>
-             <td colspan="4">No books found.</td>
-         </tr>
-         {% endif %}
+    {% if not is_signed_in %}
+        <p>Sign in to save and view your favorite books.</p>
+    {% endif %}
 
-         {% for book in books %}
-        <tr>
-          <td><a href="book_detail/{{ book.id }}">  {{ book.name }} </a></td>
-          <td>{{ book.price }}</td>
-          <td>{{ book.username }}</td>
-          <td>{{ book.publish_date }}</td>
-        </tr>
-      </tbody>
-         {% endfor %}
+    <table class="professional-table">
+        <thead>
+            <tr class="table-title-row">
+                <th colspan="5">Display Books</th>
+            </tr>
+
+            <tr>
+                <th scope="col">Book Name</th>
+                <th scope="col">Book Price</th>
+                <th scope="col">User Name</th>
+                <th scope="col">Post Date</th>
+                <th scope="col">Favorite</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for book in books %}
+                <tr>
+                    <td>
+                        <a href="{% url 'book_detail' book.id %}">
+                            {{ book.name }}
+                        </a>
+                    </td>
+
+                    <td>{{ book.price }}</td>
+                    <td>{{ book.username }}</td>
+                    <td>{{ book.publishdate }}</td>
+
+                    <td>
+                        {% if is_signed_in %}
+                            <form method="post"
+                                  action="{% url 'favorite_book' book.id %}"
+                                  class="favorite-form">
+
+                                {% csrf_token %}
+
+                                <input type="hidden"
+                                       name="filter"
+                                       value="{{ selected_filter }}">
+
+                                {% if book.id in favorite_ids %}
+                                    <button type="submit"
+                                            name="action"
+                                            value="remove"
+                                            class="favorite-button"
+                                            aria-pressed="true"
+                                            aria-label="Remove {{ book.name }} from favorites">
+
+                                        <span aria-hidden="true">&#9829;</span>
+                                    </button>
+                                {% else %}
+                                    <button type="submit"
+                                            name="action"
+                                            value="add"
+                                            class="favorite-button"
+                                            aria-pressed="false"
+                                            aria-label="Add {{ book.name }} to favorites">
+
+                                        <span aria-hidden="true">&#9825;</span>
+                                    </button>
+                                {% endif %}
+                            </form>
+                        {% else %}
+                            <span>Sign in to favorite</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+            {% empty %}
+                <tr>
+                    <td colspan="5">
+                        {% if selected_filter == 'favorites' %}
+                            {% if is_signed_in %}
+                                You have no favorite books yet.
+                                Select All Books and heart a book to add it here.
+                            {% else %}
+                                Sign in to view your favorite books.
+                            {% endif %}
+                        {% else %}
+                            No books available.
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
     </table>
-  </div>
+</div>
 {% endblock content %}

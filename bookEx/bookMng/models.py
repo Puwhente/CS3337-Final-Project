@@ -1,18 +1,12 @@
+from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
-from django.db import models
 from django.utils import timezone
-
-# Create your models here.
 
 
 class MainMenu(models.Model):
     item = models.CharField(max_length=300, unique=True)
     link = models.CharField(max_length=300, unique=True)
-    display_order = models.PositiveIntegerField(default=0) # order navbar elements
-
-    class Meta:
-        ordering = ['display_order', 'id']
 
     def __str__(self):
         return self.item
@@ -22,15 +16,29 @@ class Book(models.Model):
     name = models.CharField(max_length=200)
     web = models.URLField(max_length=300)
     price = models.DecimalField(decimal_places=2, max_digits=8)
-    publish_date = models.DateField(auto_now=True, db_column='publishdate')
-    picture = models.FileField(upload_to='bookEx/static/uploads')
+    publishdate = models.DateField(auto_now=True)
+    picture = models.FileField(upload_to="bookEx/static/uploads")
     pic_path = models.CharField(max_length=300, editable=False, blank=True)
-    username = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+
+    username = models.ForeignKey(
+        User,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+    )
+
+    favorited_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name="favorite_books",
+        blank=True,
+    )
+
 
 class MessageThread(models.Model):
     """
     A conversation between exactly two users.
     """
+
     user1 = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -59,8 +67,7 @@ class MessageThread(models.Model):
     @staticmethod
     def normalize_users(user_a, user_b):
         """
-        Ensure user ordering is stable so that a thread between two users
-        always maps to the same unique database row.
+        Keep the user order consistent for each conversation.
         """
         if user_a.pk < user_b.pk:
             return user_a, user_b
@@ -90,7 +97,10 @@ class MessageThread(models.Model):
         return self.messages.order_by("-created_at").first()
 
     def unread_count_for(self, user):
-        return self.messages.filter(recipient=user, is_read=False).count()
+        return self.messages.filter(
+            recipient=user,
+            is_read=False,
+        ).count()
 
 
 class PrivateMessage(models.Model):
