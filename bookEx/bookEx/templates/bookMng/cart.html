@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Shopping Cart</h1>
+
+    {% if books %}
+        <table class="professional-table">
+            <thead>
+                <tr>
+                    <th>Book</th>
+                    <th>Price</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for book in books %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'book_detail' book.pk %}">
+                                {{ book.name }}
+                            </a>
+                        </td>
+                        <td>${{ book.price|floatformat:2 }}</td>
+                        <td>
+                            <form method="post"
+                                  action="{% url 'cart_remove' book.pk %}">
+                                {% csrf_token %}
+                                <button type="submit">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>Total: ${{ total|floatformat:2 }}</h2>
+    {% else %}
+        <p>Your cart is empty.</p>
+    {% endif %}
+
+    <a href="{% url 'displaybooks' %}">Continue browsing books</a>
+{% endblock content %}

@@ -20,6 +20,7 @@ from django.views.decorators.http import (
 
 from .forms import BookForm
 from .models import MainMenu, Book, MessageThread, PrivateMessage
+from decimal import Decimal
 
 
 def index(request):
@@ -365,3 +366,53 @@ def mark_thread_read(request: HttpRequest, thread_id: int) -> HttpResponse:
 
     messages.success(request, "Thread marked as read.")
     return redirect("thread_detail", thread_id=thread.id)
+
+@login_required
+@require_GET
+def cart_detail(request):
+    book_ids = request.session.get("shopping_cart", [])
+    books = list(
+        Book.objects.filter(pk__in=book_ids).order_by("name", "pk")
+    )
+
+    # Remove deleted listings from the saved cart.
+    request.session["shopping_cart"] = [book.pk for book in books]
+
+    total = sum((book.price for book in books), Decimal("0.00"))
+
+    return render(request, "bookMng/cart.html", {
+        "item_list": MainMenu.objects.all(),
+        "books": books,
+        "total": total,
+    })
+
+@login_required
+@require_POST
+def cart_add(request, book_id):
+    book = get_object_or_404(Book, pk=book_id)
+    book_ids = request.session.get("shopping_cart", [])
+
+    if book.pk in book_ids:
+        messages.info(request, "This book is already in your cart.")
+    else:
+        book_ids.append(book.pk)
+        request.session["shopping_cart"] = book_ids
+        messages.success(request, f"{book.name} was added to your cart.")
+
+    return redirect("cart_detail")
+
+@login_required
+@require_POST
+def cart_remove(request, book_id):
+    request.session["shopping_cart"] = [
+        pk
+        for pk in request.session.get("shopping_cart", [])
+        if pk != book_id
+    ]
+
+    return redirect("cart_detail")
+
+def aboutus(request):
+    return render(request, "bookMng/aboutus.html", {
+        "item_list": MainMenu.objects.all(),
+    })

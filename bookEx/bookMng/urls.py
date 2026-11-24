@@ -3,8 +3,8 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path("postbook", views.postbook, name="postbook"),
-    path("displaybooks", views.displaybooks, name="displaybooks"),
+    path("postbook/", views.postbook, name="postbook"),
+    path("displaybooks/", views.displaybooks, name="displaybooks"),
 
     path(
         "favorite_book/<int:book_id>/",
@@ -18,7 +18,7 @@ urlpatterns = [
         name="book_detail",
     ),
 
-    path("mybooks", views.mybooks, name="mybooks"),
+    path("mybooks/", views.mybooks, name="mybooks"),
 
     path(
         "book_delete/<int:book_id>",
@@ -40,4 +40,8 @@ urlpatterns = [
         views.mark_thread_read,
         name="mark_thread_read",
     ),
+    path('cart/', views.cart_detail, name='cart_detail'),
+    path('cart/add/<int:book_id>/', views.cart_add, name='cart_add'),
+    path('cart/remove/<int:book_id>/', views.cart_remove, name='cart_remove'),
+    path('aboutus/', views.aboutus, name='aboutus'),
 ]

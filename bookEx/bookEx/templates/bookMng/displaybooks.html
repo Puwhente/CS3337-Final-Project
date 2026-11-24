@@ -103,8 +103,19 @@
                             {{ book.name }}
                         </a>
                     </td>
-
-                    <td>{{ book.price }}</td>
+                    <td>
+                        ${{ book.price|floatformat:2 }}
+                        {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'cart_add' book.id %}">
+                        {% csrf_token %}
+                        <button type="submit">Add to Cart</button>
+                            </form>
+                    {% else %}
+                        <a href="{% url 'login' %}?next={% url 'displaybooks' %}">
+                            Log in to add to cart
+                        </a>
+                    {% endif %}
+                    </td>
                     <td>{{ book.username }}</td>
                     <td>{{ book.publishdate }}</td>
 
