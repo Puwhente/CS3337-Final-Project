@@ -13,3 +13,5 @@ class BookForm(ModelForm):
             'picture',
         ]
 
+class BookCommentForm(forms.Form):
+    body = forms.CharField(max_length=1000, strip=True)

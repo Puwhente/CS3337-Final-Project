@@ -1,8 +1,9 @@
-from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.db import models
 from django.utils import timezone
 
+# Create your models here.
 
 class MainMenu(models.Model):
     item = models.CharField(max_length=300, unique=True)
@@ -11,34 +12,19 @@ class MainMenu(models.Model):
     def __str__(self):
         return self.item
 
-
 class Book(models.Model):
     name = models.CharField(max_length=200)
     web = models.URLField(max_length=300)
     price = models.DecimalField(decimal_places=2, max_digits=8)
     publishdate = models.DateField(auto_now=True)
-    picture = models.FileField(upload_to="bookEx/static/uploads")
+    picture = models.FileField(upload_to='bookEx/static/uploads')
     pic_path = models.CharField(max_length=300, editable=False, blank=True)
-
-    username = models.ForeignKey(
-        User,
-        blank=True,
-        null=True,
-        on_delete=models.CASCADE,
-    )
-
-    favorited_by = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name="favorite_books",
-        blank=True,
-    )
-
+    username = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
 
 class MessageThread(models.Model):
     """
     A conversation between exactly two users.
     """
-
     user1 = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -67,7 +53,8 @@ class MessageThread(models.Model):
     @staticmethod
     def normalize_users(user_a, user_b):
         """
-        Keep the user order consistent for each conversation.
+        Ensure user ordering is stable so that a thread between two users
+        always maps to the same unique database row.
         """
         if user_a.pk < user_b.pk:
             return user_a, user_b
@@ -97,10 +84,7 @@ class MessageThread(models.Model):
         return self.messages.order_by("-created_at").first()
 
     def unread_count_for(self, user):
-        return self.messages.filter(
-            recipient=user,
-            is_read=False,
-        ).count()
+        return self.messages.filter(recipient=user, is_read=False).count()
 
 
 class PrivateMessage(models.Model):
@@ -135,3 +119,15 @@ class PrivateMessage(models.Model):
             self.is_read = True
             self.read_at = timezone.now()
             self.save(update_fields=["is_read", "read_at"])
+
+class BookComment(models.Model):
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="comments")
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    body = models.TextField(max_length=1000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at", "pk"]
+
+    def __str__(self):
+        return f"Comment by {self.author} on {self.book.name}"
