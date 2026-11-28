@@ -1,5 +1,0 @@
-TO COMPLETE
-
-Show software components, interfaces, and dependencies in the design.
-
-Save the completed diagram or document in this folder and remove this placeholder.

@@ -1,5 +1,0 @@
-TO COMPLETE
-
-Show the main functional components and their dependencies.
-
-Save the completed diagram or document in this folder and remove this placeholder.

@@ -1,5 +1,0 @@
-TO COMPLETE
-
-Describe each database table and field, including type, meaning, keys, nullability, and constraints.
-
-Save the completed diagram or document in this folder and remove this placeholder.

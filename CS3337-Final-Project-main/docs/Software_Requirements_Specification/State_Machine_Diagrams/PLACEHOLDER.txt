@@ -1,5 +1,0 @@
-TO COMPLETE
-
-Show object states and the events that cause transitions.
-
-Save the completed diagram or document in this folder and remove this placeholder.
