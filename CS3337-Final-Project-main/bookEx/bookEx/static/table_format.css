@@ -1,0 +1,73 @@
+.table-container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.professional-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.professional-table th,
+.professional-table td {
+  border: 1px solid #cfd8e3;
+  width: 180px;
+  height: 52px;
+  padding: 10px;
+  text-align: center;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+}
+
+.professional-table .table-title-row th {
+  background: #1f6fb2;
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  height: 60px;
+}
+
+.professional-table thead tr:nth-child(2) th {
+  background: #dce9f7;
+  color: #1f2d3d;
+  font-weight: 600;
+}
+
+.professional-table tbody tr:nth-child(odd) {
+  background: #d9d9d9;
+}
+
+.professional-table tbody tr:nth-child(even) {
+  background: #fff2a8;
+}
+
+/* Book comments span the table and wrap independently of the book cells. */
+.professional-table .book-comments-row td {
+  white-space: normal;
+  overflow: visible;
+  height: auto;
+  text-align: left;
+  background: #f7f9fc;
+  padding: 20px;
+}
+.book-comments { overflow-wrap: anywhere; }
+.book-comments h2 { font-size: 18px; margin-bottom: 12px; color: #1f2d3d; }
+.book-comment { padding: 12px 0; border-bottom: 1px solid #dce3ed; }
+.book-comment time { font-size: 12px; color: #596675; margin-left: 8px; }
+.comment-body { margin-top: 6px; line-height: 1.5; }
+.no-comments { color: #596675; margin-bottom: 12px; }
+.comment-form { margin-top: 16px; }
+.comment-form label { display: block; font-weight: bold; margin-bottom: 6px; }
+.comment-form textarea { display: block; width: 100%; padding: 10px; font: inherit; border: 1px solid #aab8c8; border-radius: 5px; resize: vertical; }
+.comment-form button { margin-top: 8px; background: #1f6fb2; color: white; padding: 9px 16px; border: 0; border-radius: 5px; cursor: pointer; }
+.comment-form button:hover { background: #18568a; }
+.comment-errors { color: #a21b1b; margin-bottom: 8px; }

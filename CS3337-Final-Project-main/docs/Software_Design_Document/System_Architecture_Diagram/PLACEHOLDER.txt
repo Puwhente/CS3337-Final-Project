@@ -1,0 +1,5 @@
+TO COMPLETE
+
+Show the browser, Django application, database, and file storage and their connections.
+
+Save the completed diagram or document in this folder and remove this placeholder.
