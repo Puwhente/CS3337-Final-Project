@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>Simple Layout</title>
     <link href="{% static 'main.css' %}" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="{% static 'table_format.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'table_format.css' %}" type="text/css" />
     <link rel="stylesheet" href="{% static 'message_box.css' %}">
 </head>
 <body>
@@ -34,16 +34,14 @@
         <nav class="sidebar">
             <ul>
                 {% block sidenav %}
-                    <li><a href="{% url 'index' %}">Home</a></li>
-                    <li><a href="{% url 'displaybooks' %}">Display Books</a></li>
-                    <li><a href="{% url 'compose_message' %}">Compose</a></li>
-                    <li><a href="{% url 'inbox' %}">Inbox</a></li>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/aboutus">About Us</a></li>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#contact">Contact</a></li>
                 {% endblock sidenav %}
             </ul>
         </nav>
-{% for message in messages %}
-    <p class="{{ message.tags }}">{{ message }}</p>
-{% endfor %}
+
         <!-- Right Main Content -->
         <main class="content">
             {% block content %}
