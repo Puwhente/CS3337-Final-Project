@@ -47,6 +47,11 @@
         outline: 2px solid #2457a7;
         outline-offset: 2px;
     }
+
+    .book-comments summary {
+        cursor: pointer;
+        font-weight: bold;
+    }
 </style>
 
 <div class="table-container">
@@ -59,7 +64,6 @@
         <select name="filter"
                 id="book-filter"
                 onchange="this.form.submit()">
-
             <option value="all"
                     {% if selected_filter == 'all' %}selected{% endif %}>
                 All Books
@@ -76,7 +80,7 @@
         </noscript>
     </form>
 
-    {% if not is_signed_in %}
+    {% if not user.is_authenticated %}
         <p>Sign in to save and view your favorite books.</p>
     {% endif %}
 
@@ -85,7 +89,6 @@
             <tr class="table-title-row">
                 <th colspan="5">Display Books</th>
             </tr>
-
             <tr>
                 <th scope="col">Book Name</th>
                 <th scope="col">Book Price</th>
@@ -103,22 +106,19 @@
                             {{ book.name }}
                         </a>
                     </td>
-
                     <td>{{ book.price }}</td>
                     <td>{{ book.username }}</td>
                     <td>{{ book.publishdate }}</td>
-
                     <td>
-                        {% if is_signed_in %}
+                        {% if user.is_authenticated %}
                             <form method="post"
                                   action="{% url 'favorite_book' book.id %}"
                                   class="favorite-form">
-
                                 {% csrf_token %}
 
                                 <input type="hidden"
                                        name="filter"
-                                       value="{{ selected_filter }}">
+                                       value="{{ selected_filter|default:'all' }}">
 
                                 {% if book.id in favorite_ids %}
                                     <button type="submit"
@@ -127,7 +127,6 @@
                                             class="favorite-button"
                                             aria-pressed="true"
                                             aria-label="Remove {{ book.name }} from favorites">
-
                                         <span aria-hidden="true">&#9829;</span>
                                     </button>
                                 {% else %}
@@ -137,7 +136,6 @@
                                             class="favorite-button"
                                             aria-pressed="false"
                                             aria-label="Add {{ book.name }} to favorites">
-
                                         <span aria-hidden="true">&#9825;</span>
                                     </button>
                                 {% endif %}
@@ -148,11 +146,73 @@
                     </td>
                 </tr>
 
+                <tr class="book-comments-row" id="comments-{{ book.id }}">
+                    <td colspan="5">
+                        <details class="book-comments"
+                                 {% if comment_book_id == book.id %}open{% endif %}>
+                            <summary>
+                                Comments ({{ book.comments.count }})
+                            </summary>
+
+                            {% for comment in book.comments.all %}
+                                <article class="book-comment">
+                                    <p>
+                                        <strong>{{ comment.author.username }}</strong>
+                                        <time datetime="{{ comment.created_at|date:'c' }}">
+                                            {{ comment.created_at|date:"M j, Y, g:i a" }}
+                                        </time>
+                                    </p>
+                                    <div class="comment-body">
+                                        {{ comment.body|linebreaksbr }}
+                                    </div>
+                                </article>
+                            {% empty %}
+                                <p class="no-comments">
+                                    No comments yet. Be the first to comment!
+                                </p>
+                            {% endfor %}
+
+                            {% if user.is_authenticated %}
+                                <form method="post"
+                                      action="{% url 'add_book_comment' book.id %}"
+                                      class="comment-form">
+                                    {% csrf_token %}
+
+                                    <label for="comment-{{ book.id }}">
+                                        Add a comment
+                                    </label>
+
+                                    {% if comment_book_id == book.id %}
+                                        <div class="comment-errors" role="alert">
+                                            {{ comment_form.body.errors }}
+                                        </div>
+                                    {% endif %}
+
+                                    <textarea id="comment-{{ book.id }}"
+                                              name="body"
+                                              rows="3"
+                                              maxlength="1000"
+                                              required
+                                              placeholder="Write a comment (up to 1,000 characters)">{% if comment_book_id == book.id %}{{ comment_form.body.value|default_if_none:"" }}{% endif %}</textarea>
+
+                                    <button type="submit">Post Comment</button>
+                                </form>
+                            {% else %}
+                                <p>
+                                    <a href="{% url 'login' %}?next={% url 'displaybooks' %}">
+                                        Log in to comment
+                                    </a>
+                                </p>
+                            {% endif %}
+                        </details>
+                    </td>
+                </tr>
+
             {% empty %}
                 <tr>
                     <td colspan="5">
                         {% if selected_filter == 'favorites' %}
-                            {% if is_signed_in %}
+                            {% if user.is_authenticated %}
                                 You have no favorite books yet.
                                 Select All Books and heart a book to add it here.
                             {% else %}

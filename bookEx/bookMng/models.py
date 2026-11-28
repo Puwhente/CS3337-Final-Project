@@ -128,10 +128,33 @@ class PrivateMessage(models.Model):
         ordering = ["created_at"]
 
     def __str__(self) -> str:
-        return f"Message(from={self.sender}, to={self.recipient}, at={self.created_at})"
+        return (
+            f"Message(from={self.sender}, "
+            f"to={self.recipient}, at={self.created_at})"
+        )
 
     def mark_as_read(self):
         if not self.is_read:
             self.is_read = True
             self.read_at = timezone.now()
             self.save(update_fields=["is_read", "read_at"])
+
+
+class BookComment(models.Model):
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    body = models.TextField(max_length=1000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at", "pk"]
+
+    def __str__(self) -> str:
+        return f"Comment by {self.author} on {self.book.name}"

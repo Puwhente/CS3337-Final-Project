@@ -20,7 +20,8 @@ from django.views.decorators.http import (
 
 from .forms import BookForm
 from .models import MainMenu, Book, MessageThread, PrivateMessage
-
+from .forms import BookCommentForm
+from .models import BookComment
 
 def index(request):
     return render(
@@ -32,6 +33,7 @@ def index(request):
     )
 
 
+@login_required
 def postbook(request):
     submitted = False
 
@@ -47,7 +49,9 @@ def postbook(request):
                 pass
 
             book.save()
-            return HttpResponseRedirect("/postbook?submitted=True")
+            return HttpResponseRedirect(
+                str(reverse_lazy("postbook")) + "?submitted=True"
+            )
 
     else:
         form = BookForm()
@@ -73,7 +77,7 @@ def displaybooks(request):
         selected_filter = "all"
 
     favorite_ids = set()
-    books = Book.objects.all()
+    books = Book.objects.prefetch_related("comments__author").all()
 
     if request.user.is_authenticated:
         favorite_ids = set(
@@ -151,7 +155,7 @@ def book_detail(request, book_id):
         },
     )
 
-
+@login_required
 def mybooks(request):
     books = Book.objects.filter(username=request.user)
 
@@ -168,18 +172,17 @@ def mybooks(request):
     )
 
 
+@login_required
+@require_POST
 def book_delete(request, book_id):
-    book = Book.objects.get(id=book_id)
-    book.delete()
-
-    return render(
-        request,
-        "bookMng/book_delete.html",
-        {
-            "item_list": MainMenu.objects.all(),
-        },
+    book = get_object_or_404(
+        Book,
+        pk=book_id,
+        username=request.user,
     )
-
+    book.delete()
+    messages.success(request, "Your book was deleted.")
+    return redirect("mybooks")
 
 User = get_user_model()
 
@@ -365,3 +368,39 @@ def mark_thread_read(request: HttpRequest, thread_id: int) -> HttpResponse:
 
     messages.success(request, "Thread marked as read.")
     return redirect("thread_detail", thread_id=thread.id)
+
+@login_required
+@require_POST
+def add_book_comment(request, book_id):
+    book = get_object_or_404(Book, pk=book_id)
+    form = BookCommentForm(request.POST)
+
+    if form.is_valid():
+        BookComment.objects.create(
+            book=book,
+            author=request.user,
+            body=form.cleaned_data["body"],
+        )
+        messages.success(request, "Your comment was posted.")
+        return redirect(
+            str(reverse_lazy("displaybooks")) + f"#comments-{book.pk}"
+        )
+
+    books = Book.objects.prefetch_related("comments__author").all()
+
+    return render(
+        request,
+        "bookMng/displaybooks.html",
+        {
+            "item_list": MainMenu.objects.all(),
+            "books": books,
+            "comment_form": form,
+            "comment_book_id": book.pk,
+            "favorite_ids": set(
+                request.user.favorite_books.values_list("id", flat=True)
+            ),
+            "selected_filter": "all",
+            "is_signed_in": True,
+        },
+        status=400,
+    )
