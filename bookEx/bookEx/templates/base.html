@@ -35,7 +35,7 @@
             <ul>
                 {% block sidenav %}
                     <li><a href="/">Home</a></li>
-                    <li><a href="/aboutus">About Us</a></li>
+                    <li><a href="{% url 'aboutus' %}">About Us</a></li>
                     <li><a href="#services">Services</a></li>
                     <li><a href="#contact">Contact</a></li>
                 {% endblock sidenav %}
@@ -44,6 +44,10 @@
 
         <!-- Right Main Content -->
         <main class="content">
+        {% for message in messages %}
+            <p class="{{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+
             {% block content %}
                <h1>Main Content</h1>
             {% endblock content %}
